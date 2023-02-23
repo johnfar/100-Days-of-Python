@@ -41,11 +41,11 @@ def coffee_machine():
             report()
         elif user_input.lower() == "espresso" or user_input.lower() == "latte" or user_input.lower() == "cappuccino":
             resources_available, water, milk, coffee, cost = resourceChecker(user_input.lower())
-            print(resources_available)
             if resources_available:
+                report()
+
                 user_entered_amount = proccess_coins()
-                print(check_transaction(cost, user_entered_amount))
-                print(MENU["Money"])
+                check_transaction(cost, user_entered_amount)
                 make_coffee(user_input, water, milk, coffee)
 
 
@@ -57,25 +57,27 @@ def report():
 # Check for sufficent resources
 
 def resourceChecker(item):
-    print(MENU[item])
     cost = MENU[item]["cost"]
     if "water" in MENU[item]["ingredients"]:
         water = MENU[item]["ingredients"]["water"]
         if water > resources["water"]:
             print("Sorry there is not enough water")
-            return False
+            return False, 0, 0, 0, 0
 
     if "milk" in MENU[item]["ingredients"]:
         milk = MENU[item]["ingredients"]["milk"]
         if milk > resources["milk"]:
             print("Sorry there is not enough milk")
-            return False
+            return False, 0, 0, 0, 0
+    else:
+        milk = 0
 
     if "coffee" in MENU[item]["ingredients"]:
         coffee = MENU[item]["ingredients"]["coffee"]
         if coffee > resources["coffee"]:
             print("Sorry there is not enough coffee")
-            return False
+            return False, 0, 0, 0, 0
+
     return True, water, milk, coffee, cost
 
     
@@ -104,7 +106,7 @@ def check_transaction(cost, user_amount_entered):
         return False
     else:
         if cost < user_amount_entered:
-            print("Here is $%2d dollars in change" % (user_amount_entered - cost))
+            print("Here is $%.2f dollars in change" % (user_amount_entered - cost))
         if "Money" in MENU:
             MENU["Money"] = MENU["Money"] + cost
         else:
@@ -113,9 +115,12 @@ def check_transaction(cost, user_amount_entered):
 
 # Make Coffee
 def make_coffee(item, water, milk, coffee):
-    MENU[item]["ingredients"]["water"] = MENU[item]["ingredients"]["water"] - water
-    MENU[item]["ingredients"]["milk"] = MENU[item]["ingredients"]["milk"] - milk
-    MENU[item]["ingredients"]["coffee"] = MENU[item]["ingredients"]["coffee"] - coffee
+    if "water" in MENU[item]["ingredients"]:
+        resources["water"] = resources["water"] - water
+    if "milk" in MENU[item]["ingredients"]:
+        resources["milk"] = resources["milk"] - milk
+    if "coffee" in MENU[item]["ingredients"]:
+        resources["coffee"] = resources["coffee"] - coffee
     print("Here is your %s. Enjoy!" %item)
 
 coffee_machine()
